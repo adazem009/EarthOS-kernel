@@ -1,0 +1,45 @@
+// EarthOS kernel
+// 2020 - adazem009
+//
+// Functions
+define/"PANIC"
+{
+	getitem/"arg_1",1/"panicdesc"
+	run/"parts/panic.smc"/"bg"/panicdesc
+	exit
+}
+getlocation/"KERNEL_ROOT"
+cd/KERNEL_ROOT
+// The first step the kernel does is to search for available partitions.
+source/"tools/partscan.smc"/"parts"
+// Process inputs
+if/[arg_count > 1]
+	PANIC/"Only one argument can be passed to the kernel."
+endif
+warp
+	setlist/"KERNEL_INPUTS"
+	getlistlength/"arg_1"/"inputs"
+	set/"i",0
+	while/[i < inputs]
+		calc/"i=i+1"
+		getitem/"arg_1",i/"input"
+		getlength/input/"inputlen"
+		setlist/"inputparts"
+		set/"inputpart",""
+		set/"i2",0
+		while/[i2 < inputlen]
+			calc/"i2=i2+1"
+			getletter/input,i2/"letter"
+			if/[letter == "="]
+				append/inputpart/"inputparts"
+				set/"inputpart",""
+			else
+				set/"inputpart",inputpart,letter
+			endif
+		endloop
+		getitem/"inputparts",1/"setname"
+		getitem/"inputparts",2/"inputvalue"
+		set/"setname","KERNEL_INPUT_",setname
+		set/setname,inputvalue
+	endloop
+endwarp
