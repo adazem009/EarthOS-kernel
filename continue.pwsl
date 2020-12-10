@@ -1,0 +1,33 @@
+// Kernel continue script
+// (continue from RAM)
+// 2020 - adazem009
+//
+// Functions
+define/"PANIC"
+{
+	getitem/"arg_1",1/"panicdesc"
+	run/"parts/panic.smc"/"bg"/panicdesc
+	exit
+}
+// Check kernel root
+if/[KERNEL_ROOT == ""]
+	PANIC/"continue.pwsl: kernel root not set!"
+endif
+// Search for partitions
+listpart/"parts"
+getlistlength/"parts"/"partcount"
+// Check if ROOT partition exists
+set/"rootexists",0
+warp
+	set/"i",0
+	repeat/partcount
+		calc/"i=i+1"
+		if/[KERNEL_INPUT_ROOT_PART == i]
+			set/"rootexists",1
+		endif
+	endloop
+endwarp
+if/[rootexists == 0]
+	PANIC/"continue.pwsl: couldn't find root partition"
+endif
+selpart/KERNEL_INPUT_ROOT_PART
