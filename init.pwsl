@@ -10,8 +10,6 @@ define/"PANIC"
 }
 getlocation/"KERNEL_ROOT"
 cd/KERNEL_ROOT
-// The first step the kernel does is to search for available partitions.
-source/"tools/partscan.smc"/"parts"
 // Process inputs
 if/[arg_count > 1]
 	PANIC/"Only one argument can be passed to the kernel."
@@ -43,3 +41,10 @@ warp
 		set/setname,inputvalue
 	endloop
 endwarp
+// Setup RAM fs
+formatpart/0
+renamepart/0,"EarthOS-RAM"
+run/"parts/copyr.smc"/"wait"/KERNEL_ROOT,"~ram/kernel"
+set/"KERNEL_ROOT","~ram/kernel"
+set/"continue",KERNEL_ROOT,"/continue.smc"
+continue/continue
