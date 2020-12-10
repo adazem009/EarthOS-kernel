@@ -13,6 +13,25 @@ define/"PANIC"
 if/[KERNEL_ROOT == ""]
 	PANIC/"continue.pwsl: kernel root not set!"
 endif
+// Check OS disk
+listdisk/"disks"
+getlistlength/"disks"/"diskcount"
+set/"diskexists",0
+warp
+	set/"i",0
+	repeat/diskcount
+		calc/"i=i+1"
+		getitem/"disks",i/"disk"
+		if/[KERNEL_INPUT_OS_DISK == disk]
+			set/"diskexists",1
+		endif
+	endloop
+endwarp
+if/[diskexists == 0]
+	PANIC/"continue.pwsl: couldn't find OS disk"
+endif
+// Select OS disk
+seldisk/KERNEL_INPUT_OS_DISK
 // Search for partitions
 listpart/"parts"
 getlistlength/"parts"/"partcount"
@@ -30,4 +49,15 @@ endwarp
 if/[rootexists == 0]
 	PANIC/"continue.pwsl: couldn't find root partition"
 endif
+// Copy credits file
+set/"crpath",KERNEL_ROOT,"/CREDITS"
+copy/crpath,"~ram/krnlcredits"
+// Select (mount) root partition
 selpart/KERNEL_INPUT_ROOT_PART
+// Setup RAM permissions
+perms/"~ram","rwxrwx---"/"root"
+mkdir/"~ram/apps"
+perms/"~ram/apps","rw-rw----"/"root"
+perms/"~ram/krnlcredits","rw-rw-r--"/"root"
+// Continue to rootfs
+run/"/init.smc"/"bg"
