@@ -5,9 +5,11 @@
 define/"PANIC"
 {
 	getitem/"arg_1",1/"panicdesc"
-	run/"parts/panic.smc"/"bg"/panicdesc
+	continue/"parts/panic.smc"/panicdesc
+	print/"Kernel panic failed! Your kernel may be corrupted.",\n
 	exit
 }
+print/"[ ",%uptime," ] ","Loading EarthOS kernel...",\n
 getlocation/"KERNEL_ROOT"
 cd/KERNEL_ROOT
 // Process inputs
@@ -38,13 +40,15 @@ warp
 		getitem/"inputparts",1/"setname"
 		getitem/"inputparts",2/"inputvalue"
 		set/"setname","KERNEL_INPUT_",setname
+		print/"[ ",%uptime," ] ","kernel input: ",setname,"=",inputvalue,\n
 		set/setname,inputvalue
 	endloop
 endwarp
 // Setup RAM fs
-formatpart/0
+format/0
 renamepart/0,"EarthOS-RAM"
 run/"parts/copyr.smc"/"wait"/KERNEL_ROOT,"~ram/kernel"
 set/"KERNEL_ROOT","~ram/kernel"
 set/"continue",KERNEL_ROOT,"/continue.smc"
 continue/continue
+PANIC/"Failed to execute continue script."
